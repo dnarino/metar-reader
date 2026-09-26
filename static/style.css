@@ -568,6 +568,12 @@ button { font: inherit; }
   color: var(--on-surface-variant); font-size: 12px;
 }
 .site-footer .mono { font-weight: 600; color: var(--on-surface); }
+.footer-credit { width: 100%; padding-top: var(--space-sm); border-top: 1px solid var(--border); }
+.footer-credit a {
+  display: inline-flex; align-items: center; gap: var(--space-xs);
+  color: var(--on-surface); font-weight: 600; text-decoration: none;
+}
+.footer-credit a:hover { color: var(--primary); text-decoration: underline; }
 
 /* ---- Responsive ------------------------------------------------------------- */
 

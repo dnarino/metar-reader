@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
@@ -15,7 +16,11 @@ app = Flask(__name__)
 
 @app.context_processor
 def shared_template_data():
-    return {"popular_stations": POPULAR_STATIONS, "categories": CATEGORIES}
+    return {
+        "popular_stations": POPULAR_STATIONS,
+        "categories": CATEGORIES,
+        "current_year": datetime.now().year,
+    }
 
 
 def clean_code(value):
