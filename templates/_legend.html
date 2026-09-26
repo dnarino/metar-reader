@@ -1,0 +1,16 @@
+{# Flight rules legend. Highlights `current` category if given. #}
+<section class="card card-pad-md">
+  <h2 class="card-title"><span class="material-symbols-outlined icon-primary">info</span>Flight Rules Legend</h2>
+  <p class="caption muted" style="margin: 2px 0 var(--space-sm)">FAA standard flight categories:</p>
+  <div class="legend">
+    {% for key, info in categories.items() %}
+      <div class="legend-row {% if key == current %}is-current{% endif %}">
+        <span class="cat cat-{{ key }}">{{ key }}</span>
+        <div>
+          <strong>{{ info.name }}</strong>
+          <span class="muted">{{ info.rule }}</span>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>

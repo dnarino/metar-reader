@@ -1,0 +1,16 @@
+{# Sidebar card filled in by app.js from localStorage. Expects `kind` ("recent" or "favorites"). #}
+<section class="card card-pad-md">
+  <div class="card-header" style="margin-bottom: var(--space-sm)">
+    <h2 class="card-title">
+      {% if kind == "favorites" %}
+        <span class="material-symbols-outlined icon-primary">star</span>Favorites
+      {% else %}
+        <span class="material-symbols-outlined icon-primary">history</span>Recent Lookups
+      {% endif %}
+    </h2>
+    <a class="caption" href="{{ url_for(kind) }}">View all</a>
+  </div>
+  <ul class="station-list" data-station-list="{{ kind }}" data-limit="5">
+    <li class="empty">Loading…</li>
+  </ul>
+</section>

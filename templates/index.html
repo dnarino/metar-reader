@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+  {% include "_search.html" %}
+
+  <div class="dossier">
+    <div class="stack">
+      {% with kind = "favorites" %}{% include "_station_list_card.html" %}{% endwith %}
+      {% with kind = "recent" %}{% include "_station_list_card.html" %}{% endwith %}
+    </div>
+    <div class="stack">
+      {% with current = None %}{% include "_legend.html" %}{% endwith %}
+    </div>
+  </div>
+{% endblock %}

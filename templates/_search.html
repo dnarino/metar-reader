@@ -1,0 +1,41 @@
+{# Search card. Expects optional `code` and `error`. #}
+<section class="card card-pad search-card">
+  <div class="search-head">
+    <div>
+      <h1>Airport Weather Briefing</h1>
+      <p>Current METAR reports, decoded into plain language.</p>
+    </div>
+    <span class="status-pill"><span class="pulse-dot"></span>LIVE · AVIATIONWEATHER.GOV</span>
+  </div>
+
+  <form class="search-form" action="{{ url_for('lookup') }}" method="get" role="search">
+    <div class="search-field">
+      <span class="material-symbols-outlined lead-icon">search</span>
+      <label class="visually-hidden" for="code-input">Airport code</label>
+      <input id="code-input" name="code" type="text" value="{{ code or '' }}"
+             placeholder="ICAO code (e.g. KJFK, EGLL, KHIO)" maxlength="4"
+             autocomplete="off" spellcheck="false" required {% if not code %}autofocus{% endif %}>
+      <button class="clear-btn" id="clear-input" type="button" title="Clear" {% if not code %}hidden{% endif %}>
+        <span class="material-symbols-outlined icon-sm">cancel</span>
+      </button>
+    </div>
+    <button class="btn btn-primary btn-lg" type="submit">
+      <span class="material-symbols-outlined">air</span>Get Weather
+    </button>
+  </form>
+
+  {% if error %}
+    <div class="alert" role="alert">
+      <span class="material-symbols-outlined">error</span><span>{{ error }}</span>
+    </div>
+  {% endif %}
+
+  <div class="chips">
+    <span class="chips-label">Popular stations:</span>
+    {% for pcode, pname in popular_stations %}
+      <a class="chip {% if pcode == code %}is-active{% endif %}" href="{{ url_for('station', code=pcode) }}">
+        {{ pcode }} <span>{{ pname }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ "Favorites" if list_kind == "favorites" else "Recent Reports" }}{% endblock %}
+{% block content %}
+  <div class="page-head">
+    {% if list_kind == "favorites" %}
+      <h1>Favorites</h1>
+      <p>Your starred airports with their current conditions. Star an airport from its weather page to add it here.</p>
+    {% else %}
+      <h1>Recent Reports</h1>
+      <p>Airports you've looked up recently, with their current conditions.</p>
+    {% endif %}
+  </div>
+
+  <div class="dossier">
+    <section class="card list-page">
+      <ul class="station-list" data-station-list="{{ list_kind }}" data-detailed data-removable>
+        <li class="empty">Loading…</li>
+      </ul>
+    </section>
+    <div class="stack">
+      <p class="caption muted">Saved in this browser only. Clearing your browser data removes the list.</p>
+      {% with current = None %}{% include "_legend.html" %}{% endwith %}
+    </div>
+  </div>
+{% endblock %}

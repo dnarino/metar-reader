@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Decoder Guide{% endblock %}
+{% block content %}
+  <div class="page-head">
+    <h1>Decoder Guide</h1>
+    <p>A METAR is a short coded weather report from an airport. Here's how to read one, group by group.</p>
+  </div>
+
+  <div class="guide">
+    <div class="stack">
+      <section class="card card-pad guide-section">
+        <h2>An example, piece by piece</h2>
+        <div class="example"><b>METAR</b> KJFK 241851Z 31012G18KT 10SM FEW045 BKN250 18/06 A3002 RMK AO2</div>
+        <table class="code-table">
+          <thead><tr><th>Group</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td>METAR</td><td>Routine hourly report. <span class="mono">SPECI</span> means a special report issued because conditions changed.</td></tr>
+            <tr><td>KJFK</td><td>Station: the 4-letter ICAO code (New York JFK). US codes start with K, UK codes with EG.</td></tr>
+            <tr><td>241851Z</td><td>Day 24 of the month, 18:51 Zulu (UTC).</td></tr>
+            <tr><td>31012G18KT</td><td>Wind from 310° at 12 knots, gusting to 18. <span class="mono">00000KT</span> is calm and <span class="mono">VRB</span> is variable.</td></tr>
+            <tr><td>10SM</td><td>Visibility 10 statute miles. Outside the US it's in meters, and <span class="mono">9999</span> means 10 km or more.</td></tr>
+            <tr><td>FEW045</td><td>Few clouds at 4,500 ft. Heights are in hundreds of feet above the ground.</td></tr>
+            <tr><td>BKN250</td><td>Broken clouds at 25,000 ft. The lowest BKN or OVC layer is the <em>ceiling</em>.</td></tr>
+            <tr><td>18/06</td><td>Temperature 18 °C, dew point 6 °C. <span class="mono">M</span> means minus, e.g. <span class="mono">M02</span>.</td></tr>
+            <tr><td>A3002</td><td>Altimeter 30.02 inHg. Outside the US it's <span class="mono">Q1016</span>, in hectopascals.</td></tr>
+            <tr><td>RMK AO2</td><td>Remarks. AO2 is an automated station with a precipitation sensor.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card card-pad guide-section">
+        <h2>Cloud cover</h2>
+        <p>Cover is measured in eighths (oktas) of the sky.</p>
+        <table class="code-table" style="margin-top: var(--space-sm)">
+          <tbody>
+            <tr><td>SKC / CLR</td><td>Sky clear (CLR: no clouds below 12,000 ft, automated station)</td></tr>
+            <tr><td>FEW</td><td>Few: 1–2 eighths</td></tr>
+            <tr><td>SCT</td><td>Scattered: 3–4 eighths</td></tr>
+            <tr><td>BKN</td><td>Broken: 5–7 eighths. Counts as a ceiling.</td></tr>
+            <tr><td>OVC</td><td>Overcast: 8 eighths. Counts as a ceiling.</td></tr>
+            <tr><td>VV</td><td>Vertical visibility into fog or other obscuration. Counts as a ceiling.</td></tr>
+            <tr><td>CB / TCU</td><td>Cumulonimbus / towering cumulus, e.g. <span class="mono">BKN020CB</span></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card card-pad guide-section">
+        <h2>Weather codes</h2>
+        <p>Weather is built from an intensity, a descriptor and a phenomenon. For example, <span class="mono">-SHRA</span> means light rain showers and <span class="mono">+TSRA</span> means a heavy thunderstorm with rain.</p>
+        <h3 class="upper-label" style="margin: var(--space-md) 0 var(--space-sm)">Intensity</h3>
+        <div class="code-grid">
+          <span><span class="mono">-</span>light</span><span><span class="mono">+</span>heavy</span><span><span class="mono">VC</span>in the vicinity</span><span><span class="mono">(none)</span>moderate</span>
+        </div>
+        <h3 class="upper-label" style="margin: var(--space-md) 0 var(--space-sm)">Descriptors</h3>
+        <div class="code-grid">
+          <span><span class="mono">SH</span>showers</span><span><span class="mono">TS</span>thunderstorm</span><span><span class="mono">FZ</span>freezing</span><span><span class="mono">BL</span>blowing</span>
+          <span><span class="mono">DR</span>low drifting</span><span><span class="mono">MI</span>shallow</span><span><span class="mono">BC</span>patches</span><span><span class="mono">PR</span>partial</span>
+        </div>
+        <h3 class="upper-label" style="margin: var(--space-md) 0 var(--space-sm)">Phenomena</h3>
+        <div class="code-grid">
+          <span><span class="mono">RA</span>rain</span><span><span class="mono">DZ</span>drizzle</span><span><span class="mono">SN</span>snow</span><span><span class="mono">GR</span>hail</span>
+          <span><span class="mono">PL</span>ice pellets</span><span><span class="mono">BR</span>mist</span><span><span class="mono">FG</span>fog</span><span><span class="mono">HZ</span>haze</span>
+          <span><span class="mono">FU</span>smoke</span><span><span class="mono">DU</span>dust</span><span><span class="mono">SQ</span>squalls</span><span><span class="mono">FC</span>funnel cloud</span>
+        </div>
+      </section>
+
+      <section class="card card-pad guide-section">
+        <h2>Values this app calculates</h2>
+        <p><strong>Relative humidity</strong> comes from the temperature and dew point (Magnus formula). When the two are close, expect fog or low cloud.</p>
+        <p><strong>Density altitude</strong> is how high the airplane "feels" it is. Hot weather and low pressure raise it and reduce aircraft performance. It's estimated as pressure altitude + 120 ft × (temperature − standard temperature).</p>
+        <p><strong>Headwind and crosswind</strong> for each runway come from the angle between the wind and the runway heading: headwind = wind × cos(angle), crosswind = wind × sin(angle).</p>
+      </section>
+    </div>
+
+    <div class="stack">
+      {% with current = None %}{% include "_legend.html" %}{% endwith %}
+      <section class="card card-pad-md">
+        <h2 class="card-title"><span class="material-symbols-outlined icon-primary">travel_explore</span>Try it</h2>
+        <p class="muted" style="margin: var(--space-xs) 0 var(--space-sm)">Open a live report and compare it with this guide:</p>
+        <div class="chips">
+          {% for pcode, pname in popular_stations %}
+            <a class="chip" href="{{ url_for('station', code=pcode) }}">{{ pcode }} <span>{{ pname }}</span></a>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </div>
+{% endblock %}

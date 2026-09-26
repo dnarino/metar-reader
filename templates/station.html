@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}{{ b.code }} Weather{% endblock %}
+{% block content %}
+  {% include "_search.html" %}
+
+  <div class="dossier">
+    {# ---- Main briefing column ---- #}
+    <div class="stack">
+      <section class="card card-pad" id="station"
+               data-code="{{ b.code }}" data-name="{{ b.name }}" data-location="{{ b.location or '' }}"
+               data-category="{{ b.category }}"
+               data-temp-f="{{ b.temperature.f if b.temperature else '' }}">
+        <div class="station-head">
+          <div>
+            <div class="station-id">
+              <span class="station-code">{{ b.code }}</span>
+              <span class="tag">ICAO</span>
+              {% if b.iata %}<span class="tag">{{ b.iata }} · IATA</span>{% endif %}
+            </div>
+            <p class="station-name">{{ b.name }}</p>
+            <div class="station-meta">
+              {% if b.location %}<span>{{ b.location }}</span>{% endif %}
+              {% if b.coords %}<span class="mono">{{ b.coords }}</span>{% endif %}
+              {% if b.elev_ft is not none %}<span>Elev: <strong>{{ "{:,}".format(b.elev_ft) }} ft MSL</strong></span>{% endif %}
+            </div>
+          </div>
+          <div class="station-stamp">
+            <span class="cat cat-stamp cat-{{ b.category }}" title="{{ b.category_info.rule }}">
+              <span class="cat-dot"></span>{{ b.category }}
+            </span>
+            <span class="caption muted">{{ b.category_info.name }}</span>
+            <button class="fav-btn" id="fav-toggle" type="button" aria-pressed="false">
+              <span class="material-symbols-outlined icon-sm">star</span><span class="fav-label">Add to favorites</span>
+            </button>
+          </div>
+        </div>
+
+        <p class="summary-line">{{ b.summary }}</p>
+
+        <div class="obs-strip">
+          {% if b.obs %}
+            <span><span class="material-symbols-outlined icon-sm icon-primary">schedule</span>
+              {{ b.report_type }} issued <strong>{{ b.obs.time }} UTC</strong> ({{ b.obs.age }})</span>
+          {% endif %}
+          {% if b.remarks.station_type %}
+            <span><span class="material-symbols-outlined icon-sm" style="color: var(--good)">verified</span>{{ b.remarks.station_type }}</span>
+          {% endif %}
+        </div>
+      </section>
+
+      <div class="metrics">
+        {# Wind #}
+        <section class="card metric">
+          <div class="metric-head"><span class="upper-label">Surface Wind</span><span class="material-symbols-outlined">air</span></div>
+          {% if b.wind.calm %}
+            <div class="metric-value"><span class="big">Calm</span></div>
+            <div class="metric-foot"><span>Less than 1 knot</span></div>
+          {% else %}
+            <div class="metric-value">
+              <span class="big">{{ b.wind.speed }}</span><span class="unit">kts</span>
+              {% if b.wind.gust %}<span class="gust">G{{ b.wind.gust }} KT</span>{% endif %}
+            </div>
+            <div class="wind-dir">
+              {% if not b.wind.variable %}
+                <span class="wind-arrow" title="Wind blows toward this direction">
+                  {# Arrow points where the wind blows TO (direction + 180°). #}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                       stroke-linecap="round" stroke-linejoin="round"
+                       style="transform: rotate({{ (b.wind.dir or 0) + 180 }}deg)"><path d="M12 20V4M5 11l7-7 7 7"/></svg>
+                </span>
+              {% endif %}
+              <span class="caption muted">
+                {% if b.wind.variable %}<strong>Variable</strong>Direction varies
+                {% else %}<strong>From {{ "%03d"|format(b.wind.dir|int) }}° ({{ b.wind.compass }})</strong>{{ b.wind.mph }} mph{% if b.wind.gust %}, gusts {{ (b.wind.gust * 1.15078)|round|int }} mph{% endif %}{% endif %}
+              </span>
+            </div>
+          {% endif %}
+        </section>
+
+        {# Visibility #}
+        <section class="card metric">
+          <div class="metric-head"><span class="upper-label">Visibility</span><span class="material-symbols-outlined">visibility</span></div>
+          <div class="metric-value">
+            <span class="big">{{ b.visibility.text or "—" }}{% if b.visibility.plus %}+{% endif %}</span>
+            {% if b.visibility.text %}<span class="unit">Statute Miles</span>{% endif %}
+          </div>
+          {% if b.visibility.note %}
+            <span class="note note-{{ b.visibility.note[0] }}">
+              <span class="material-symbols-outlined icon-sm">{{ 'check_circle' if b.visibility.note[0] == 'good' else 'warning' }}</span>
+              {{ b.visibility.note[1] }}
+            </span>
+          {% endif %}
+        </section>
+
+        {# Sky #}
+        <section class="card metric">
+          <div class="metric-head"><span class="upper-label">Sky Condition</span><span class="material-symbols-outlined">cloud</span></div>
+          <div>
+            <div class="metric-value"><span class="mid">{{ b.sky.headline }}</span></div>
+            <p class="muted" style="font-size: 13px">{{ b.sky.note }}{% if b.sky.weather %} · {{ b.sky.weather|join(", ") }}{% endif %}</p>
+          </div>
+          <div class="metric-lines">{% for line in b.sky.layers %}<div>{{ line }}</div>{% endfor %}</div>
+        </section>
+
+        {# Temperature #}
+        <section class="card metric">
+          <div class="metric-head"><span class="upper-label">Temp &amp; Dew Point</span><span class="material-symbols-outlined">thermostat</span></div>
+          {% if b.temperature %}
+            <div class="metric-value">
+              <span class="big">{{ b.temperature.c }}°</span><span class="unit">C</span>
+              {% if b.temperature.dew_c is not none %}
+                <span class="sep">/</span>
+                <span class="mid muted">{{ b.temperature.dew_c }}°</span><span class="unit">C dew</span>
+              {% endif %}
+            </div>
+            <div class="metric-foot">
+              <span>{{ b.temperature.f }}°F{% if b.temperature.dew_f is not none %} / {{ b.temperature.dew_f }}°F{% endif %}</span>
+              {% if b.temperature.humidity is not none %}<span class="mono">{{ b.temperature.humidity }}% RH</span>{% endif %}
+            </div>
+          {% else %}
+            <div class="metric-value"><span class="big">—</span></div><div class="metric-foot"><span>Not reported</span></div>
+          {% endif %}
+        </section>
+
+        {# Pressure #}
+        <section class="card metric">
+          <div class="metric-head"><span class="upper-label">Altimeter (QNH)</span><span class="material-symbols-outlined">speed</span></div>
+          {% if b.pressure %}
+            <div class="metric-value"><span class="big">{{ b.pressure.inhg }}</span><span class="unit">inHg</span></div>
+            <div class="metric-foot"><span>{{ b.pressure.trend }}</span><span class="mono">{{ b.pressure.hpa }} hPa</span></div>
+          {% else %}
+            <div class="metric-value"><span class="big">—</span></div><div class="metric-foot"><span>Not reported</span></div>
+          {% endif %}
+        </section>
+
+        {# Density altitude #}
+        <section class="card metric">
+          <div class="metric-head"><span class="upper-label">Density Altitude</span><span class="material-symbols-outlined">landscape</span></div>
+          {% if b.density %}
+            <div class="metric-value"><span class="big">{{ "{:+,}".format(b.density.ft) }}</span><span class="unit">ft</span></div>
+            <div class="metric-foot">
+              <span class="note note-{{ b.density.risk[0] }}">{{ b.density.risk[1] }}</span>
+              <span class="mono">Field {{ "{:,}".format(b.elev_ft) }} ft</span>
+            </div>
+          {% else %}
+            <div class="metric-value"><span class="big">—</span></div><div class="metric-foot"><span>Not enough data</span></div>
+          {% endif %}
+        </section>
+      </div>
+
+      <section class="raw-box">
+        <div class="raw-head">
+          <span class="raw-title"><span class="material-symbols-outlined icon-sm">terminal</span>Raw METAR (ICAO standard)</span>
+          <button class="copy-btn" id="copy-raw" type="button">
+            <span class="material-symbols-outlined icon-sm">content_copy</span><span class="copy-label">Copy</span>
+          </button>
+        </div>
+        <code class="raw-text" id="raw-metar">{{ b.raw }}</code>
+        <div class="raw-foot">
+          {% if b.slp %}<span>Sea level pressure: <span class="mono">{{ b.slp }} hPa</span></span>{% endif %}
+          {% if b.remarks.exact_temp %}<span>Exact temp: <span class="mono">{{ b.remarks.exact_temp }}</span></span>{% endif %}
+          <span>Learn to read it in the <a href="{{ url_for('guide') }}" style="color: var(--cockpit-accent)">Decoder Guide</a></span>
+        </div>
+      </section>
+    </div>
+
+    {# ---- Sidebar ---- #}
+    <div class="stack">
+      <section class="card card-pad-md">
+        <div class="card-header">
+          <h2 class="card-title"><span class="material-symbols-outlined icon-primary">flight_takeoff</span>Runway &amp; Winds</h2>
+          <span class="mono caption muted">{{ b.code }} RWYS</span>
+        </div>
+        {% if b.runways %}
+          <div class="stack-md" style="gap: 12px">
+            {% for r in b.runways %}
+              <div class="runway {% if r.status == 'CROSSWIND' %}is-cross{% elif r.status in ('STRONG CROSSWIND', 'TAILWIND') %}is-bad{% endif %}">
+                <div class="runway-head">
+                  <strong>Runway {{ r.end }} <span class="muted" style="font-weight: 400">({{ r.id }})</span></strong>
+                  <span class="status status-{{ r.status|replace(' ', '-') }}">{{ r.status }}</span>
+                </div>
+                <div class="runway-meta">
+                  <span>Heading {{ "%03d"|format(r.heading) }}° true</span>
+                  <span>{% if r.length %}{{ "{:,}".format(r.length|int) }} ft{% endif %}{% if r.surface %} · {{ r.surface }}{% endif %}</span>
+                </div>
+                {% if r.status != "CALM" %}
+                  <div class="bar" title="Headwind share of total wind"><span style="width: {{ r.headwind_pct }}%"></span></div>
+                  <div class="runway-foot">
+                    <span>{{ 'Tailwind' if r.headwind < 0 else 'Headwind' }}: {{ r.headwind|abs }} kts</span>
+                    <span>Xwind: {{ r.crosswind }} kts{% if r.cross_side %} {{ r.cross_side }}{% endif %}</span>
+                  </div>
+                  {% if r.gust_crosswind and r.gust_crosswind > r.crosswind %}
+                    <div class="runway-meta"><span>Gust crosswind up to {{ r.gust_crosswind }} kts</span></div>
+                  {% endif %}
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+          <p class="caption muted" style="margin-top: 12px">Best end of each runway for the current wind. Headings are true, from FAA/ICAO airport data.</p>
+        {% elif b.wind.variable %}
+          <p class="empty">Wind direction is variable, so runway components can't be calculated.</p>
+        {% else %}
+          <p class="empty">No runway data available for this station.</p>
+        {% endif %}
+      </section>
+
+      {% with current = b.category %}{% include "_legend.html" %}{% endwith %}
+      {% with kind = "recent" %}{% include "_station_list_card.html" %}{% endwith %}
+    </div>
+  </div>
+{% endblock %}
