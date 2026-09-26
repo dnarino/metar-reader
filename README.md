@@ -31,6 +31,10 @@ python -m pip install pytest
 python -m pytest
 ```
 
+The tests don't need internet access. `tests/mock_weather.py` fakes the aviationweather.gov API with a catalog of
+mock METAR readings (clear and calm, fog, thunderstorm with crosswind, metric report, variable wind, and a sparse report),
+and each one lists what the page must show. To test a new weather situation, add an entry to `SCENARIOS`.
+
 ## Project layout
 
 | File | Purpose |
@@ -40,4 +44,5 @@ python -m pytest
 | `briefing.py` | Flight category, humidity, density altitude, runway winds |
 | `metar_decoder.py` | Parses raw METAR text into plain English |
 | `templates/`, `static/` | Front end (plain HTML/CSS/JS, no framework) |
+| `tests/` | pytest suite; `mock_weather.py` holds the mock METAR scenarios |
 | `.claude/skills/metar-design/` | Claude Code skill with the design system |
